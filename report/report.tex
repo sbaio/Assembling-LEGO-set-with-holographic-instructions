@@ -1,0 +1,566 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\usepackage{cvpr}
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Include other packages here, before hyperref.
+\graphicspath{{Figures/}}
+% If you comment hyperref and then uncomment it, you should delete
+% egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
+% run, let it finish, and you should be clear).
+\usepackage[breaklinks=true,bookmarks=false]{hyperref}
+
+\cvprfinalcopy % *** Uncomment this line for the final submission
+
+\def\cvprPaperID{****} % *** Enter the CVPR Paper ID here
+\def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
+
+% Pages are numbered in submission mode, and unnumbered in camera-ready
+%\ifcvprfinal\pagestyle{empty}\fi
+\setcounter{page}{1}
+\begin{document}
+
+%%%%%%%%% TITLE
+\title{Assembling LEGO set with augmented reality instructions}
+
+\author{Othman Sbai\\
+{\tt\small othman.sbai@eleves.enpc.fr}
+% For a paper whose authors are all at the same institution,
+% omit the following lines up until the closing ``}''.
+% Additional authors and addresses can be added with ``\and'',
+% just like the second author.
+% To save space, use either the email address or home page, not both
+\and
+Pierre-Alain Langlois\\
+{\tt\small pierre-alain.langlois@eleves.enpc.fr}
+}
+
+\maketitle
+%\thispagestyle{empty}
+\pdfinfo{%
+  /Title    (Project report - Computer vision - Sbai & Langlois)
+  /Author   (Othman Sbai, Pierre-Alain Langlois)
+  /Creator  (Pierre-Alain Langlois, Othman Sbai)
+  /Subject  (Augmented reality - tracking)
+  /Keywords (augmented reality neural network ponts)
+}
+
+%%%%%%%%% ABSTRACT
+\begin{abstract}
+   For our project for Object recognition and computer vision course, we tackled the problem of assembling Lego set using computer vision techniques. The aim is to make use of new holographic tools in order to suggest the right instructions to the user who is performing assembly task. We will first present our approach of the problem, show how we used computer vision algorithms to track the evolution of the assembly phase and suggesting the right instructions. For that task we will present the new and fast object detection framework called YOLO (You Only Live Once), which we used as a base image recognition tool by adapting it the LEGO pieces. We will present our training results accompanied by what difficulties we faced when using this young framework, and finally we will expose the work we did on the interface part of the project which means, building a hololens app that annotates the holographic world of the user by adding 3D LEGO objets on the detected pieces to move suggesting, this way, the next step to perform.
+\end{abstract}
+
+%%%%%%%%% BODY TEXT
+\section{Introduction}
+
+The advent of augmented reality devices such as Microsoft Hololens, Sony SmartEyeglass or Google Glass and others have made possible many interesting applications that augment the visual experience of the user with 3D holograms that are blended on his reality. Applications range from interior decoration and design, gaming but also increasing productivity in businesses by enhancing the real world and giving birth to broader imagination.
+
+Among the applications of this new promising technology, still in development, one can be interested providing instructions for people to help them accomplish tasks either with human supervision or by annotating reality through an artificial agent that sees the world and suggests instructions through holograms as it is shown in figure ~\ref{fig:AnnotatingWorld}. In fact, as presented in \cite{alayrac_unsupervised_2015}, we can extract from the tutorial videos available online instructions for performing many tasks such as changing car tires, assembling furniture and also performing Cardiopulmonary rescucitation. These instructions can be efficiently provided to user with a 3D augmented reality device in the form of holograms and world annotations that are much comprehensible than paper instructions.
+
+\begin{figure}[t]
+\begin{center}
+   \includegraphics[width=0.8\linewidth]{Annotating_world_hololens}
+\end{center}
+   \caption{Annotating the world with Microsoft Hololens.}
+\label{fig:AnnotatingWorld}
+\end{figure}
+
+\section{Project organization}
+
+We organized the work on this project in two consecutice sections, first detecting and localizing LEGO assemblies from a 2D video feed, for example the 2D locatable camera in the front of the Hololens and secondly present the relevant instructions for the corresponding step on the Hololens by blending LEGO Holograms on the user's reality. Note that it is possible to save the augmented reality video of both the camera feed and the annotating holograms from the Hololens thanks to a functionality called mixed capture. 
+
+\section{Learning to recognize the assemblies and their location on an image}
+
+\subsection{Suggested approach}
+
+In order to suggest the right instruction our algorithm should be able to detect the state or advancement of building the set and detect the assemblies. The problem can get complex if we think about the multitude of possibilities the user can do to fool the algorithm, but we focus on the use case where the user starts building one assembly gradually and not multiple assemblies. For each step, there are only 3 instances to recognize: the current assembly state, the part that has to be added, and the global assembly when the instruction has been fulfilled. As a consequence, we want to build a system which is able at each state to recognize the 3 current instances and to locate them in the image.
+\medbreak
+In order to do so, we use the method described in (YOLO)~\cite{redmon_you_2015}, which we will presented in subsection~\ref{subsec:YOLO_subsection} which allows to perform local classification efficiently thanks to a convolution neural network. This approach requires to first generate relevant data in order to perform the training.
+
+\subsection{Generating the data}
+
+Since we are not able to directly generate a dataset of annotated pictures for the lego set, we generate it artificially. We first create the 3D model the lego parts. In order to do so, we did use the software SolidWorks. Then, we built a script that generates the annotated pictures with Blender~\cite{blender} and OpenCV~\cite{opencv_library}. Another possibility would be to use a software fro LEGO company called LEGO Digital Designer which provides all the LEGO parts 3D models and facilitates the assembly virtually.
+
+In this section, we detail this script created for generating random rendering 
+
+\subsubsection{Build}
+
+On the machine, we need to build Python 3 from source with './configure --enable-shared'. Then we need 
+to compile Blender as a module for this Python distribution as well as OpenCV. Then, we have all the tools 
+needed to perform the generation.
+
+\subsubsection{Input}
+
+The important point here is that the classes of our classification task are the assemblies, not the parts 
+themselves. As a consequence, we have created a standard csv file that enables to defines an assembly by 
+specifying each file that constitutes the assembly, the diffuse color for each part, and the world matrix 
+that enables to place each part in space. 
+Note that it is easy to place an assembly in blender gui and to obtain the World Matrix for each object 
+thanks to the python command 'bpy.context.active\_object.matrix\_world'.
+This framework allows to easily generate classes for other system than the lego games.
+
+\subsubsection{Algorithm}
+
+The algorithm is designed in two parts : 
+\begin{itemize}
+ \item Rendering the parts
+ \item Making insertions
+\end{itemize}
+The full process is detailed on Figure~\ref{render}.
+Each assembly is being set up thanks to the world matrix and the corresponding materials are setup thanks 
+to the defined color.
+The number of rendering for each part is taken as a parameter. We define the center of the object as the 
+center of its bounding box. For each rendering, we take a random point on the sphere around the object. We 
+set a camera that points towards the object center and we include a random lightning that is located in a 
+region which is close to the camera. Then, we are able to make the rendering. \\
+The second is step is to randomly insert the rendering on random backgrounds. Note that we add a random 
+number of renderings on a single background. We obtained the backgrounds 
+from the Imagenet~\cite{imagenet_cvpr09} dataset. We set the size of the rendering to be between $10\%$ and 
+$90\%$ of the background size with a threshold in order to avoid oversizing. \\
+In YOLO, we must set one text file per image in order to define the bounding boxes and the class of each 
+object located in the window. We checked the validity of our implementation by drawing the bounding boxes with 
+the same function on the data that were used in~\cite{redmon_you_2015} and our data.
+
+
+\begin{figure}
+ \centering
+ \includegraphics[scale=0.12]{DataGener}
+ \caption{Rendering process}
+ \label{render}
+\end{figure}
+
+
+
+\subsection{About Yolo framework}
+\label{subsec:YOLO_subsection}
+The Yolo framework was entirely built by the author of~\cite{redmon_you_2015}. It is made in C language with 
+a CUDA support in order to be able to perform efficient training. The framework is still under development 
+and needs a few modifications in order to be able to perform detection on arbitrary data. The YOLO neural 
+divides the picture on a regular grid and it generates two types of data out of an image. It first generates 
+one class detection per cell on the picutre ; and each cell is also responsible for generating a given number 
+of bounding boxes that are centered inside of the cell itself, with a confidence indice for each box. From 
+the two information and thanks to an additional threshold on the confidence value, we are able to deduce the 
+bounding boxes. \\
+The cost function for the training (see~\cite{redmon_you_2015}) allows to give a customized weight on each 
+aspect of the prediction : the center of the bounding box, its size, and the class that is being predicted. 
+When we train the network on customized data, we only have to train the 4 final layers, because the first 
+layers are trained on imagenet. This makes the data customization easier because we need less time to 
+compute the customized network.
+
+\subsection{Results}
+
+We tried the training on 2 classes. We chose 700 rendering per class and 10000 training data (renderings 
+added to the backgrounds) for the training part. 0.1\% of the data is dedicated to the evaluation. In 
+order to monitor precisely the learning process, we modified the code in order to output the learning curves 
+as represented on Figure~\ref{learningCurve}. The training took about 2 hours on an AWS EC2 web server. 
+Unfortunately, we could not achieve the last integration part in which we use the trained network on the 
+Hololens. However, we could plan the integration process and we could experiment on this last integration 
+brick.
+
+
+\begin{figure}
+ \centering
+ \includegraphics[scale=0.28]{LearningCurve}
+ \caption{Typical learning curve when training the model}
+ \label{learningCurve}
+\end{figure}
+
+
+\section{Porting to Hololens}
+Microsoft Hololens is not a cheap platform to work on as it cost at least 3000\$. We would like to thank our professor for providing this device for development. Ans thankfully there is the possibility of working on an emulator for hololens on Visual Studio. This requires a certain setup: (Visual Studio 2015 working on Windows 10 Pro or Education edition which support virtualization needed by the emulator). There are two possible ways of creating an app for the Hololens, either by creating a scene on the game engine Unity, with a specified setup and then building the VS solution, or directly creating a DirectX C++ app which is more low-level than the first one.
+
+In order to draw holograms in the correct place in the 3D scene in Unity and thus rendered in the right 3D location in user's vision, we need to map the pixel position on the RGB 2D frame obtained from the hololens locatable camera to the 3D coordinate in the Holographic Scene. This mapping provides only the ray toward which the object should be place, however we still need to determine the distance of the holorgram from the user. This can be achieved through two different methods. One can for example place the holograms relative to the surrounding space of the user by intersecting the ray found previously with the spatial mapping information provided by the Hololens. Or one can use the size of the detected bounding box and the known size of the tracked object to infer the depth of the hologram. 
+
+We demonstrated the second approach based on a code from Microsoft Universal Samples where we detect a face an superpose a rotating colored cube using a DirectX app as we can see in the figure~\ref{fig:Holo_FaceTracker}
+
+\begin{figure}[t]
+\begin{center}
+   \includegraphics[width=0.8\linewidth]{HoloTracker}
+\end{center}
+   \caption{Annotation based on specified location using frontal camera info.}
+\label{fig:Holo_FaceTracker}
+\end{figure}
+
+{\small
+\bibliographystyle{ieee}
+\bibliography{biblio}
+}
+
+\end{document}
+
+%-------------------------------------------------------------------------
+\clearpage
+\subsection{Language}
+
+All manuscripts must be in English.
+
+\subsection{Dual submission}
+
+Please refer to the author guidelines on the CVPR 2016 web page for a
+discussion of the policy on dual submissions.
+
+\subsection{Paper length}
+Papers, excluding the references section,
+must be no longer than eight pages in length. The references section
+will not be included in the page count, and there is no limit on the
+length of the references section. For example, a paper of eight pages
+with two pages of references would have a total length of 10 pages.
+{\bf There will be no extra page charges for
+  CVPR 2016.}
+
+Overlength papers will simply not be reviewed.  This includes papers
+where the margins and formatting are deemed to have been significantly
+altered from those laid down by this style guide.  Note that this
+\LaTeX\ guide already sets figure captions and references in a smaller font.
+The reason such papers will not be reviewed is that there is no provision for
+supervised revisions of manuscripts.  The reviewing process cannot determine
+the suitability of the paper for presentation in eight pages if it is
+reviewed in eleven.  
+
+%-------------------------------------------------------------------------
+\subsection{The ruler}
+The \LaTeX\ style defines a printed ruler which should be present in the
+version submitted for review.  The ruler is provided in order that
+reviewers may comment on particular lines in the paper without
+circumlocution.  If you are preparing a document using a non-\LaTeX\
+document preparation system, please arrange for an equivalent ruler to
+appear on the final output pages.  The presence or absence of the ruler
+should not change the appearance of any other content on the page.  The
+camera ready copy should not contain a ruler. (\LaTeX\ users may uncomment
+the \verb'\cvprfinalcopy' command in the document preamble.)  Reviewers:
+note that the ruler measurements do not align well with lines in the paper
+--- this turns out to be very difficult to do well when the paper contains
+many figures and equations, and, when done, looks ugly.  Just use fractional
+references (e.g.\ this line is $095.5$), although in most cases one would
+expect that the approximate location will be adequate.
+
+\subsection{Mathematics}
+
+Please number all of your sections and displayed equations.  It is
+important for readers to be able to refer to any particular equation.  Just
+because you didn't refer to it in the text doesn't mean some future reader
+might not need to refer to it.  It is cumbersome to have to use
+circumlocutions like ``the equation second from the top of page 3 column
+1''.  (Note that the ruler will not be present in the final copy, so is not
+an alternative to equation numbers).  All authors will benefit from reading
+Mermin's description of how to write mathematics:
+\url{http://www.pamitc.org/documents/mermin.pdf}.
+
+
+\subsection{Blind review}
+
+Many authors misunderstand the concept of anonymizing for blind
+review.  Blind review does not mean that one must remove
+citations to one's own work---in fact it is often impossible to
+review a paper unless the previous citations are known and
+available.
+
+Blind review means that you do not use the words ``my'' or ``our''
+when citing previous work.  That is all.  (But see below for
+techreports.)
+
+Saying ``this builds on the work of Lucy Smith [1]'' does not say
+that you are Lucy Smith; it says that you are building on her
+work.  If you are Smith and Jones, do not say ``as we show in
+[7]'', say ``as Smith and Jones show in [7]'' and at the end of the
+paper, include reference 7 as you would any other cited work.
+
+An example of a bad paper just asking to be rejected:
+\begin{quote}
+\begin{center}
+    An analysis of the frobnicatable foo filter.
+\end{center}
+
+   In this paper we present a performance analysis of our
+   previous paper [1], and show it to be inferior to all
+   previously known methods.  Why the previous paper was
+   accepted without this analysis is beyond me.
+
+   [1] Removed for blind review
+\end{quote}
+
+
+An example of an acceptable paper:
+
+\begin{quote}
+\begin{center}
+     An analysis of the frobnicatable foo filter.
+\end{center}
+
+   In this paper we present a performance analysis of the
+   paper of Smith \etal [1], and show it to be inferior to
+   all previously known methods.  Why the previous paper
+   was accepted without this analysis is beyond me.
+
+   [1] Smith, L and Jones, C. ``The frobnicatable foo
+   filter, a fundamental contribution to human knowledge''.
+   Nature 381(12), 1-213.
+\end{quote}
+
+If you are making a submission to another conference at the same time,
+which covers similar or overlapping material, you may need to refer to that
+submission in order to explain the differences, just as you would if you
+had previously published related work.  In such cases, include the
+anonymized parallel submission~\cite{Authors14} as additional material and
+cite it as
+\begin{quote}
+[1] Authors. ``The frobnicatable foo filter'', F\&G 2014 Submission ID 324,
+Supplied as additional material {\tt fg324.pdf}.
+\end{quote}
+
+Finally, you may feel you need to tell the reader that more details can be
+found elsewhere, and refer them to a technical report.  For conference
+submissions, the paper must stand on its own, and not {\em require} the
+reviewer to go to a techreport for further details.  Thus, you may say in
+the body of the paper ``further details may be found
+in~\cite{Authors14b}''.  Then submit the techreport as additional material.
+Again, you may not assume the reviewers will read this material. 
+
+Sometimes your paper is about a problem which you tested using a tool which
+is widely known to be restricted to a single institution.  For example,
+let's say it's 1969, you have solved a key problem on the Apollo lander,
+and you believe that the CVPR70 audience would like to hear about your
+solution.  The work is a development of your celebrated 1968 paper entitled
+``Zero-g frobnication: How being the only people in the world with access to
+the Apollo lander source code makes us a wow at parties'', by Zeus \etal.
+
+You can handle this paper like any other.  Don't write ``We show how to
+improve our previous work [Anonymous, 1968].  This time we tested the
+algorithm on a lunar lander [name of lander removed for blind review]''.
+That would be silly, and would immediately identify the authors. Instead
+write the following:
+\begin{quotation}
+\noindent
+   We describe a system for zero-g frobnication.  This
+   system is new because it handles the following cases:
+   A, B.  Previous systems [Zeus et al. 1968] didn't
+   handle case B properly.  Ours handles it by including
+   a foo term in the bar integral.
+
+   ...
+
+   The proposed system was integrated with the Apollo
+   lunar lander, and went all the way to the moon, don't
+   you know.  It displayed the following behaviours
+   which show how well we solved cases A and B: ...
+\end{quotation}
+As you can see, the above text follows standard scientific convention,
+reads better than the first version, and does not explicitly name you as
+the authors.  A reviewer might think it likely that the new paper was
+written by Zeus \etal, but cannot make any decision based on that guess.
+He or she would have to be sure that no other authors could have been
+contracted to solve problem B.
+
+FAQ: Are acknowledgements OK?  No.  Leave them for the final copy.
+
+
+\begin{figure}[t]
+\begin{center}
+\fbox{\rule{0pt}{2in} \rule{0.9\linewidth}{0pt}}
+   %\includegraphics[width=0.8\linewidth]{egfigure.eps}
+\end{center}
+   \caption{Example of caption.  It is set in Roman so that mathematics
+   (always set in Roman: $B \sin A = A \sin B$) may be included without an
+   ugly clash.}
+\label{fig:long}
+\label{fig:onecol}
+\end{figure}
+
+\subsection{Miscellaneous}
+
+\noindent
+Compare the following:\\
+\begin{tabular}{ll}
+ \verb'$conf_a$' &  $conf_a$ \\
+ \verb'$\mathit{conf}_a$' & $\mathit{conf}_a$
+\end{tabular}\\
+See The \TeX book, p165.
+
+The space after \eg, meaning ``for example'', should not be a
+sentence-ending space. So \eg is correct, {\em e.g.} is not.  The provided
+\verb'\eg' macro takes care of this.
+
+When citing a multi-author paper, you may save space by using ``et alia'',
+shortened to ``\etal'' (not ``{\em et.\ al.}'' as ``{\em et}'' is a complete word.)
+However, use it only when there are three or more authors.  Thus, the
+following is correct: ``
+   Frobnication has been trendy lately.
+   It was introduced by Alpher~\cite{Alpher02}, and subsequently developed by
+   Alpher and Fotheringham-Smythe~\cite{Alpher03}, and Alpher \etal~\cite{Alpher04}.''
+
+This is incorrect: ``... subsequently developed by Alpher \etal~\cite{Alpher03} ...''
+because reference~\cite{Alpher03} has just two authors.  If you use the
+\verb'\etal' macro provided, then you need not worry about double periods
+when used at the end of a sentence as in Alpher \etal.
+
+For this citation style, keep multiple citations in numerical (not
+chronological) order, so prefer \cite{Alpher03,Alpher02,Authors14} to
+\cite{Alpher02,Alpher03,Authors14}.
+
+
+\begin{figure*}
+\begin{center}
+\fbox{\rule{0pt}{2in} \rule{.9\linewidth}{0pt}}
+\end{center}
+   \caption{Example of a short caption, which should be centered.}
+\label{fig:short}
+\end{figure*}
+
+%------------------------------------------------------------------------
+\section{Formatting your paper}
+
+All text must be in a two-column format. The total allowable width of the
+text area is $6\frac78$ inches (17.5 cm) wide by $8\frac78$ inches (22.54
+cm) high. Columns are to be $3\frac14$ inches (8.25 cm) wide, with a
+$\frac{5}{16}$ inch (0.8 cm) space between them. The main title (on the
+first page) should begin 1.0 inch (2.54 cm) from the top edge of the
+page. The second and following pages should begin 1.0 inch (2.54 cm) from
+the top edge. On all pages, the bottom margin should be 1-1/8 inches (2.86
+cm) from the bottom edge of the page for $8.5 \times 11$-inch paper; for A4
+paper, approximately 1-5/8 inches (4.13 cm) from the bottom edge of the
+page.
+
+%-------------------------------------------------------------------------
+\subsection{Margins and page numbering}
+
+All printed material, including text, illustrations, and charts, must be kept
+within a print area 6-7/8 inches (17.5 cm) wide by 8-7/8 inches (22.54 cm)
+high.
+Page numbers should be in footer with page numbers, centered and .75
+inches from the bottom of the page and make it start at the correct page
+number rather than the 4321 in the example.  To do this fine the line (around
+line 23)
+\begin{verbatim}
+%\ifcvprfinal\pagestyle{empty}\fi
+\setcounter{page}{4321}
+\end{verbatim}
+where the number 4321 is your assigned starting page.
+
+Make sure the first page is numbered by commenting out the first page being
+empty on line 46
+\begin{verbatim}
+%\thispagestyle{empty}
+\end{verbatim}
+
+
+%-------------------------------------------------------------------------
+\subsection{Type-style and fonts}
+
+Wherever Times is specified, Times Roman may also be used. If neither is
+available on your word processor, please use the font closest in
+appearance to Times to which you have access.
+
+MAIN TITLE. Center the title 1-3/8 inches (3.49 cm) from the top edge of
+the first page. The title should be in Times 14-point, boldface type.
+Capitalize the first letter of nouns, pronouns, verbs, adjectives, and
+adverbs; do not capitalize articles, coordinate conjunctions, or
+prepositions (unless the title begins with such a word). Leave two blank
+lines after the title.
+
+AUTHOR NAME(s) and AFFILIATION(s) are to be centered beneath the title
+and printed in Times 12-point, non-boldface type. This information is to
+be followed by two blank lines.
+
+The ABSTRACT and MAIN TEXT are to be in a two-column format.
+
+MAIN TEXT. Type main text in 10-point Times, single-spaced. Do NOT use
+double-spacing. All paragraphs should be indented 1 pica (approx. 1/6
+inch or 0.422 cm). Make sure your text is fully justified---that is,
+flush left and flush right. Please do not place any additional blank
+lines between paragraphs.
+
+Figure and table captions should be 9-point Roman type as in
+Figures~\ref{fig:onecol} and~\ref{fig:short}.  Short captions should be centred.
+
+\noindent Callouts should be 9-point Helvetica, non-boldface type.
+Initially capitalize only the first word of section titles and first-,
+second-, and third-order headings.
+
+FIRST-ORDER HEADINGS. (For example, {\large \bf 1. Introduction})
+should be Times 12-point boldface, initially capitalized, flush left,
+with one blank line before, and one blank line after.
+
+SECOND-ORDER HEADINGS. (For example, { \bf 1.1. Database elements})
+should be Times 11-point boldface, initially capitalized, flush left,
+with one blank line before, and one after. If you require a third-order
+heading (we discourage it), use 10-point Times, boldface, initially
+capitalized, flush left, preceded by one blank line, followed by a period
+and your text on the same line.
+
+%-------------------------------------------------------------------------
+\subsection{Footnotes}
+
+Please use footnotes\footnote {This is what a footnote looks like.  It
+often distracts the reader from the main flow of the argument.} sparingly.
+Indeed, try to avoid footnotes altogether and include necessary peripheral
+observations in
+the text (within parentheses, if you prefer, as in this sentence).  If you
+wish to use a footnote, place it at the bottom of the column on the page on
+which it is referenced. Use Times 8-point type, single-spaced.
+
+
+%-------------------------------------------------------------------------
+\subsection{References}
+
+List and number all bibliographical references in 9-point Times,
+single-spaced, at the end of your paper. When referenced in the text,
+enclose the citation number in square brackets, for
+example~\cite{Authors14}.  Where appropriate, include the name(s) of
+editors of referenced books.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+Method & Frobnability \\
+\hline\hline
+Theirs & Frumpy \\
+Yours & Frobbly \\
+Ours & Makes one's heart Frob\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Results.   Ours is better.}
+\end{table}
+
+%-------------------------------------------------------------------------
+\subsection{Illustrations, graphs, and photographs}
+
+All graphics should be centered.  Please ensure that any point you wish to
+make is resolvable in a printed copy of the paper.  Resize fonts in figures
+to match the font in the body text, and choose line widths which render
+effectively in print.  Many readers (and reviewers), even of an electronic
+copy, will choose to print your paper in order to read it.  You cannot
+insist that they do otherwise, and therefore must not assume that they can
+zoom in to see tiny details on a graphic.
+
+When placing figures in \LaTeX, it's almost always best to use
+\verb+\includegraphics+, and to specify the  figure width as a multiple of
+the line width as in the example below
+{\small\begin{verbatim}
+   \usepackage[dvips]{graphicx} ...
+   \includegraphics[width=0.8\linewidth]
+                   {myfile.eps}
+\end{verbatim}
+}
+
+
+%-------------------------------------------------------------------------
+\subsection{Color}
+
+Please refer to the author guidelines on the CVPR 2016 web page for a discussion
+of the use of color in your document.
+
+%------------------------------------------------------------------------
+\section{Final copy}
+
+You must include your signed IEEE copyright release form when you submit
+your finished paper. We MUST have this form before your paper can be
+published in the proceedings.
+
+
+

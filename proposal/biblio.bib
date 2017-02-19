@@ -1,0 +1,68 @@
+
+@article{redmon_you_2015,
+	title = {You {Only} {Look} {Once}: {Unified}, {Real}-{Time} {Object} {Detection}},
+	shorttitle = {You {Only} {Look} {Once}},
+	url = {http://arxiv.org/abs/1506.02640},
+	abstract = {We present YOLO, a new approach to object detection. Prior work on object detection repurposes classifiers to perform detection. Instead, we frame object detection as a regression problem to spatially separated bounding boxes and associated class probabilities. A single neural network predicts bounding boxes and class probabilities directly from full images in one evaluation. Since the whole detection pipeline is a single network, it can be optimized end-to-end directly on detection performance. Our unified architecture is extremely fast. Our base YOLO model processes images in real-time at 45 frames per second. A smaller version of the network, Fast YOLO, processes an astounding 155 frames per second while still achieving double the mAP of other real-time detectors. Compared to state-of-the-art detection systems, YOLO makes more localization errors but is far less likely to predict false detections where nothing exists. Finally, YOLO learns very general representations of objects. It outperforms all other detection methods, including DPM and R-CNN, by a wide margin when generalizing from natural images to artwork on both the Picasso Dataset and the People-Art Dataset.},
+	urldate = {2016-12-05},
+	journal = {arXiv:1506.02640 [cs]},
+	author = {Redmon, Joseph and Divvala, Santosh and Girshick, Ross and Farhadi, Ali},
+	month = jun,
+	year = {2015},
+	note = {arXiv: 1506.02640},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition},
+	file = {arXiv\:1506.02640 PDF:/home/thefroggy/.zotero/zotero/jz0ln6z8.default/zotero/storage/8PATUUBM/Redmon et al. - 2015 - You Only Look Once Unified, Real-Time Object Dete.pdf:application/pdf;arXiv.org Snapshot:/home/thefroggy/.zotero/zotero/jz0ln6z8.default/zotero/storage/4DSS9N7R/1506.html:text/html}
+}
+
+@article{wang_unsupervised_2015,
+	title = {Unsupervised {Learning} of {Visual} {Representations} using {Videos}},
+	url = {http://arxiv.org/abs/1505.00687},
+	abstract = {Is strong supervision necessary for learning a good visual representation? Do we really need millions of semantically-labeled images to train a Convolutional Neural Network (CNN)? In this paper, we present a simple yet surprisingly powerful approach for unsupervised learning of CNN. Specifically, we use hundreds of thousands of unlabeled videos from the web to learn visual representations. Our key idea is that visual tracking provides the supervision. That is, two patches connected by a track should have similar visual representation in deep feature space since they probably belong to the same object or object part. We design a Siamese-triplet network with a ranking loss function to train this CNN representation. Without using a single image from ImageNet, just using 100K unlabeled videos and the VOC 2012 dataset, we train an ensemble of unsupervised networks that achieves 52\% mAP (no bounding box regression). This performance comes tantalizingly close to its ImageNet-supervised counterpart, an ensemble which achieves a mAP of 54.4\%. We also show that our unsupervised network can perform competitively in other tasks such as surface-normal estimation.},
+	urldate = {2016-12-05},
+	journal = {arXiv:1505.00687 [cs]},
+	author = {Wang, Xiaolong and Gupta, Abhinav},
+	month = may,
+	year = {2015},
+	note = {arXiv: 1505.00687},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition},
+	file = {arXiv\:1505.00687 PDF:/home/thefroggy/.zotero/zotero/jz0ln6z8.default/zotero/storage/IW7JPMJS/Wang et Gupta - 2015 - Unsupervised Learning of Visual Representations us.pdf:application/pdf;arXiv.org Snapshot:/home/thefroggy/.zotero/zotero/jz0ln6z8.default/zotero/storage/XQNAUSFC/1505.html:text/html}
+}
+
+@article{wohlhart_learning_2015,
+	title = {Learning {Descriptors} for {Object} {Recognition} and 3D {Pose} {Estimation}},
+	url = {http://arxiv.org/abs/1502.05908},
+	abstract = {Detecting poorly textured objects and estimating their 3D pose reliably is still a very challenging problem. We introduce a simple but powerful approach to computing descriptors for object views that efficiently capture both the object identity and 3D pose. By contrast with previous manifold-based approaches, we can rely on the Euclidean distance to evaluate the similarity between descriptors, and therefore use scalable Nearest Neighbor search methods to efficiently handle a large number of objects under a large range of poses. To achieve this, we train a Convolutional Neural Network to compute these descriptors by enforcing simple similarity and dissimilarity constraints between the descriptors. We show that our constraints nicely untangle the images from different objects and different views into clusters that are not only well-separated but also structured as the corresponding sets of poses: The Euclidean distance between descriptors is large when the descriptors are from different objects, and directly related to the distance between the poses when the descriptors are from the same object. These important properties allow us to outperform state-of-the-art object views representations on challenging RGB and RGB-D data.},
+	urldate = {2016-12-05},
+	journal = {arXiv:1502.05908 [cs]},
+	author = {Wohlhart, Paul and Lepetit, Vincent},
+	month = feb,
+	year = {2015},
+	note = {arXiv: 1502.05908},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition},
+	annote = {Comment: CVPR 2015},
+	file = {arXiv\:1502.05908 PDF:/home/thefroggy/.zotero/zotero/jz0ln6z8.default/zotero/storage/5UW4WT6I/Wohlhart et Lepetit - 2015 - Learning Descriptors for Object Recognition and 3D.pdf:application/pdf;arXiv.org Snapshot:/home/thefroggy/.zotero/zotero/jz0ln6z8.default/zotero/storage/P9922XGV/1502.html:text/html}
+}
+
+@article{alayrac_unsupervised_2015,
+	title = {Unsupervised {Learning} from {Narrated} {Instruction} {Videos}},
+	url = {http://arxiv.org/abs/1506.09215},
+	abstract = {We address the problem of automatically learning the main steps to complete a certain task, such as changing a car tire, from a set of narrated instruction videos. The contributions of this paper are three-fold. First, we develop a new unsupervised learning approach that takes advantage of the complementary nature of the input video and the associated narration. The method solves two clustering problems, one in text and one in video, applied one after each other and linked by joint constraints to obtain a single coherent sequence of steps in both modalities. Second, we collect and annotate a new challenging dataset of real-world instruction videos from the Internet. The dataset contains about 800,000 frames for five different tasks that include complex interactions between people and objects, and are captured in a variety of indoor and outdoor settings. Third, we experimentally demonstrate that the proposed method can automatically discover, in an unsupervised manner, the main steps to achieve the task and locate the steps in the input videos.},
+	urldate = {2016-12-05},
+	journal = {arXiv:1506.09215 [cs]},
+	author = {Alayrac, Jean-Baptiste and Bojanowski, Piotr and Agrawal, Nishant and Sivic, Josef and Laptev, Ivan and Lacoste-Julien, Simon},
+	month = jun,
+	year = {2015},
+	note = {arXiv: 1506.09215},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Learning, I.2, I.5.1, I.5.4},
+	annote = {Comment: Appears in: 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR 2016). 21 pages},
+	file = {arXiv\:1506.09215 PDF:/home/thefroggy/.zotero/zotero/jz0ln6z8.default/zotero/storage/EGAJI94S/Alayrac et al. - 2015 - Unsupervised Learning from Narrated Instruction Vi.pdf:application/pdf;arXiv.org Snapshot:/home/thefroggy/.zotero/zotero/jz0ln6z8.default/zotero/storage/RSUHNT8Z/1506.html:text/html}
+}
+
+@book{botha_realtime_2009,
+	title = {Realtime {LEGO} {Brick} {Image} {Retrieval} with {Cellular} {Automata}},
+	abstract = {Abstract: We consider the realtime content-based image retrieval of LEGO bricks from a database of images of LEGO bricks. This seemingly simple problem contains a number of surprisingly the image signature, and corresponding feature set, and illustrate cellular automaton-based methods for the whole feature extraction phase. Key Words: Content-based image retrieval},
+	author = {Botha, Leendert and Zijl, Lynette Van and Hoffmann, Mcelory},
+	month = jul,
+	year = {2009},
+	file = {Citeseer - Full Text PDF:/home/thefroggy/.zotero/zotero/jz0ln6z8.default/zotero/storage/I97R6QWU/Botha et al. - Realtime LEGO Brick Image Retrieval with Cellular .pdf:application/pdf;Citeseer - Snapshot:/home/thefroggy/.zotero/zotero/jz0ln6z8.default/zotero/storage/CU8N4ZKR/summary.html:text/html}
+}
